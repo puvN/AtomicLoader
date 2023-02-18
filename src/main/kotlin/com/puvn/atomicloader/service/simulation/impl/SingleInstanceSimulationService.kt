@@ -5,8 +5,7 @@ import com.puvn.atomicloader.config.loader.LoaderConfig
 import com.puvn.atomicloader.logging.Logger
 import com.puvn.atomicloader.service.load.LoadService
 import com.puvn.atomicloader.service.simulation.SimulationService
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -25,7 +24,6 @@ class SingleInstanceSimulationService(
 ) : SimulationService {
 
     override fun simulateLoad() {
-        val totalRequestsForEndpoint = loaderConfig.requestsPerSecond * loaderConfig.testingPeriodSeconds
         runBlocking {
             for (url in targetConfig.urls) {
                 log.info("sending requests to $url")
@@ -33,17 +31,20 @@ class SingleInstanceSimulationService(
                     log.info("endpoint is $endpoint")
                     val target = url + endpoint
                     val startTime = LocalDateTime.now()
-                    val requests = List(totalRequestsForEndpoint) {
-                        async {
-                            val response = makeRequest(target)
-                            handleResponse(response)
-                        }
-                    }
-                    requests.awaitAll()
+                    sendRequestsPerSecond(target, loaderConfig.requestsPerSecond, loaderConfig.testingPeriodSeconds)
                     val endTime = LocalDateTime.now()
-                    log.info("duration: ${Duration.between(startTime, endTime).seconds}")
+                    log.info("duration: ${Duration.between(startTime, endTime).seconds} seconds" )
                 }
             }
+        }
+    }
+
+    private suspend fun sendRequestsPerSecond(target: String, requestsPerSecond: Int, durationSeconds: Int) {
+        val delayMillis = 1000 / requestsPerSecond.toLong() // calculate delay in milliseconds
+        repeat(requestsPerSecond * durationSeconds) {
+            val response = makeRequest(target)
+            handleResponse(response) //TODO handle response in asynchronous manner
+            delay(delayMillis)
         }
     }
 
@@ -51,7 +52,7 @@ class SingleInstanceSimulationService(
         return loadService.makeRequest(target)
     }
 
-    private fun handleResponse(response: String) {
+    private suspend fun handleResponse(response: String) {
         loadService.handleResponse(response)
     }
 
