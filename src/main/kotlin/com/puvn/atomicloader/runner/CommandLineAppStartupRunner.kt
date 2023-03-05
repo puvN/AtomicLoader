@@ -2,7 +2,6 @@ package com.puvn.atomicloader.runner
 
 import com.puvn.atomicloader.logging.Logger
 import com.puvn.atomicloader.service.simulation.SimulationService
-import com.puvn.atomicloader.service.simulation.impl.SingleInstanceSimulationService
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 

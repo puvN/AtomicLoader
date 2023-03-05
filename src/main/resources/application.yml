@@ -19,7 +19,7 @@ loader-config:
   # load testing profile - local (on local machine) / remote (on remote host)
   profile: LOCAL
   # process-per-instance (on jvm for each target instance)
-  process-per-instance: false
+  process-per-instance: true
 
 
 

@@ -21,7 +21,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
 
     //developmentOnly
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -31,6 +31,7 @@ dependencies {
 
 	//tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 
 	//annotations
 	annotationProcessor ("org.springframework.boot:spring-boot-configuration-processor")
