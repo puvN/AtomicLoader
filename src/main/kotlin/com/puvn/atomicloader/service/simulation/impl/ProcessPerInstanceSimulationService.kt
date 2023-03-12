@@ -4,8 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.puvn.atomicloader.config.application_target.ApplicationTargetConfig
 import com.puvn.atomicloader.config.loader.LoaderConfig
 import com.puvn.atomicloader.logging.Logger
-import com.puvn.atomicloader.model.SingleInstanceSimulationProcess
-import com.puvn.atomicloader.service.load.LoadService
+import com.puvn.atomicloader.process.SingleInstanceSimulationProcess
 import com.puvn.atomicloader.service.simulation.SimulationService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -17,7 +16,6 @@ import java.lang.management.ManagementFactory
 @ConditionalOnProperty(value = ["loader-config.process-per-instance"], havingValue = "true")
 class ProcessPerInstanceSimulationService(
     private val loaderConfig: LoaderConfig,
-    private val loadService: LoadService,
     private val targetConfig: ApplicationTargetConfig,
 ) : SimulationService {
 
@@ -26,8 +24,12 @@ class ProcessPerInstanceSimulationService(
         val currentPid = ManagementFactory.getRuntimeMXBean().pid
         log.info("parent pid is $currentPid, I am preparing child processes")
         //TODO start processes together, not each after each
+        //TODO keep link to a process or pid to have possibility to kill it at shutdown of parent pid
         for (url in targetConfig.urls) {
-            exec(SingleInstanceSimulationProcess::class.java, listOf(), listOf("-Xmx200m"))
+            exec(SingleInstanceSimulationProcess::class.java, listOf(
+                getJsonStringRepresentation(loaderConfig),
+                getJsonStringRepresentation(targetConfig)
+            ), listOf("-Xmx200m"))
             log.info("process for url $url has started")
         }
     }
@@ -52,6 +54,10 @@ class ProcessPerInstanceSimulationService(
         process.waitFor()
         return process.exitValue()
     }
+
+    //https://stackoverflow.com/questions/45260447/adding-double-quotes-symbol-in-processbuilder
+    private fun getJsonStringRepresentation(value: Any) =
+        mapper.writeValueAsString(value).replace("\"", "\\\"")
 
     companion object {
         val log by Logger()
