@@ -28,9 +28,9 @@ class ProcessPerInstanceSimulationService(
 
     private val mapper = jacksonObjectMapper()
 
-    private val executorService: ExecutorService = Executors.newCachedThreadPool()
+    internal val executorService: ExecutorService = Executors.newCachedThreadPool()
 
-    private val processMap: ConcurrentMap<Long, Process> = ConcurrentHashMap()
+    internal val processMap: ConcurrentMap<Long, Process> = ConcurrentHashMap()
 
     override fun simulateLoad() {
         log.info("parent pid is ${ManagementFactory.getRuntimeMXBean().pid}, I am preparing child processes")
@@ -53,7 +53,7 @@ class ProcessPerInstanceSimulationService(
     }
 
     @Throws(IOException::class, InterruptedException::class)
-    fun createProcessBuilder(
+    private fun createProcessBuilder(
         clazz: Class<*>,
         args: List<String> = emptyList(),
         jvmArgs: List<String> = emptyList()
@@ -75,7 +75,7 @@ class ProcessPerInstanceSimulationService(
     }
 
     @PreDestroy
-    fun shutDown() {
+    internal fun shutDown() {
         log.info("killing child processes")
         this.processMap.values.forEach { it.destroy() }
         log.info("killing executor service")
