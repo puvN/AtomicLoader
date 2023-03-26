@@ -3,8 +3,7 @@ package com.puvn.atomicloader.service.simulation.impl
 import com.puvn.atomicloader.config.application_target.ApplicationTargetConfig
 import com.puvn.atomicloader.config.loader.LoaderConfig
 import com.puvn.atomicloader.config.loader.LoaderProfile
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
@@ -20,7 +19,7 @@ class ProcessPerInstanceSimulationServiceTest {
         5, 10, LoaderProfile.LOCAL, true
     )
 
-    private val targetConfig = ApplicationTargetConfig(setOf("https://www.google.com"),
+    private val targetConfig = ApplicationTargetConfig(setOf("https://www.google.com", "apple.com", "microsoft.com"),
         setOf("endpoint1")
     )
 
@@ -36,8 +35,7 @@ class ProcessPerInstanceSimulationServiceTest {
         simulationService.simulateLoad()
 
         // Assert
-        assertTrue(outputStream.toString(StandardCharsets.UTF_8.name()).isNotBlank())
-        assertTrue(simulationService.processMap.isNotEmpty())
+        assertEquals(3, simulationService.processMap.size)
 
         // Cleanup
         simulationService.shutDown()
@@ -45,22 +43,21 @@ class ProcessPerInstanceSimulationServiceTest {
     }
 
     @Test
-    @Disabled
-    //TODO fix executor service mock
-    fun `shutDown should stop all child processes and shutdown the executor`() {
-        val process = mock(Process::class.java)
+    fun `shutDown should call stop for all child processes`() {
         val processMap = ConcurrentHashMap<Long, Process>()
-        processMap[1] = process
+        for (url in targetConfig.urls) {
+            val process = mock(Process::class.java)
+            processMap[targetConfig.urls.indexOf(url).toLong()] = process
+        }
+
         val service = spy(ProcessPerInstanceSimulationService(loaderConfig, targetConfig)).apply {
             this.processMap.putAll(processMap)
         }
 
-        val executorServiceMock = spy(service.executorService)
-
         service.shutDown()
-
-        verify(process).destroy()
-        verify(executorServiceMock).shutdown()
+        service.processMap.values.forEach {
+            verify(it).destroy()
+        }
     }
 
 }

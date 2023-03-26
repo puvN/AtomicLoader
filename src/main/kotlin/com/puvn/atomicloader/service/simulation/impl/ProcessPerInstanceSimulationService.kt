@@ -28,7 +28,7 @@ class ProcessPerInstanceSimulationService(
 
     private val mapper = jacksonObjectMapper()
 
-    internal val executorService: ExecutorService = Executors.newCachedThreadPool()
+    private val executorService: ExecutorService = Executors.newCachedThreadPool()
 
     internal val processMap: ConcurrentMap<Long, Process> = ConcurrentHashMap()
 
