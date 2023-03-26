@@ -2,13 +2,10 @@ package com.puvn.atomicloader.process
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.puvn.atomicloader.config.application_target.ApplicationTargetConfig
-import com.puvn.atomicloader.config.loader.LoaderConfig
+import com.puvn.atomicloader.dto.ConfigDto
 import com.puvn.atomicloader.logging.Logger
 import com.puvn.atomicloader.service.load.impl.RestApiLoadService
 import com.puvn.atomicloader.service.simulation.impl.SingleInstanceSimulationService
-import com.puvn.atomicloader.util.APPLICATION_TARGET_CONFIG_ARG
-import com.puvn.atomicloader.util.LOADER_CONFIG_ARG
 import java.lang.management.ManagementFactory
 
 class SingleInstanceSimulationProcess {
@@ -20,25 +17,21 @@ class SingleInstanceSimulationProcess {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            val loaderConfigJsonString = args[LOADER_CONFIG_ARG]
-            val targetConfigJsonString = args[APPLICATION_TARGET_CONFIG_ARG]
-            val loaderConfig: LoaderConfig
-            val targetConfig: ApplicationTargetConfig
+            val configDto: ConfigDto
             try {
-                loaderConfig = mapper.readValue(loaderConfigJsonString)
-                targetConfig = mapper.readValue(targetConfigJsonString)
+                configDto = mapper.readValue(args[0])
             } catch (ex: Exception) {
                 log.error(
-                    "can't parse config values: $loaderConfigJsonString, $targetConfigJsonString"
+                    "can't parse config values: $args"
                 )
                 throw ex
             }
             val service = SingleInstanceSimulationService(
-                loaderConfig, RestApiLoadService(), targetConfig
+                configDto.loaderConfig, RestApiLoadService(), configDto.applicationTargetConfig
             )
             log.info(
                 "starting load service in a separate process ${ManagementFactory.getRuntimeMXBean().pid} " +
-                        "with configs: LoaderConfig: $loaderConfigJsonString, TargetConfig: $targetConfigJsonString"
+                        "with configs: ${configDto.loaderConfig}, ${configDto.applicationTargetConfig}"
             )
             service.simulateLoad()
         }

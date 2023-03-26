@@ -3,6 +3,7 @@ package com.puvn.atomicloader.service.simulation.impl
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.puvn.atomicloader.config.application_target.ApplicationTargetConfig
 import com.puvn.atomicloader.config.loader.LoaderConfig
+import com.puvn.atomicloader.dto.ConfigDto
 import com.puvn.atomicloader.logging.Logger
 import com.puvn.atomicloader.process.SingleInstanceSimulationProcess
 import com.puvn.atomicloader.service.simulation.SimulationService
@@ -38,8 +39,7 @@ class ProcessPerInstanceSimulationService(
         for (url in targetConfig.urls) {
             val builder = createProcessBuilder(
                 SingleInstanceSimulationProcess::class.java, listOf(
-                    getJsonStringRepresentation(loaderConfig),
-                    getJsonStringRepresentation(targetConfig)
+                    getJsonStringRepresentation(ConfigDto(loaderConfig, targetConfig))
                 ), listOf("-Xmx200m")
             )
             tasks.add {
