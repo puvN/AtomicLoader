@@ -30,7 +30,7 @@ REM Check if container is already running
 docker ps | find "atomicloadertarget" > nul 2>&1
 if %errorlevel% equ 0 (
     echo Docker container is already running
-    goto continue
+    exit /b 1
 )
 
 REM Start Docker container from image

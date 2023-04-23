@@ -28,7 +28,7 @@ class RestApiLoadService : LoadService {
     }
 
     override fun handleResponse(response: String): String {
-        log.info("got response $response")
+        log.info("got response: $response")
         return ""
     }
 
