@@ -5,5 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties("application-target")
 data class ApplicationTargetConfig(
     val urls: Set<String>,
-    val endpoints: Set<String>
+    val endpoints: Set<String>,
+    val waitForStartSeconds: Int = 0
 )

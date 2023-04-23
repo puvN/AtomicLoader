@@ -5,11 +5,12 @@ spring:
 # describes target for load testing
 application-target:
   # comma-separated target instances host:port
-  urls: http://localhost:8080,
-        http://127.0.0.1:8081
+  urls: http://localhost:8080
+        #http://127.0.0.1:8081
   # comma-separated REST API endpoints in one target
-  endpoints: /app1/v1/target-endpoint1, 
-             /app1/v1/target-endpoint2
+  endpoints: /app1/v1/target-endpoint1
+             #/app1/v1/target-endpoint2
+  wait-for-start-seconds: 5
 
 loader-config:
   # testing period in seconds for each endpoint
