@@ -5,7 +5,11 @@ import com.puvn.atomicloader.config.loader.LoaderConfig
 import com.puvn.atomicloader.logging.Logger
 import com.puvn.atomicloader.service.load.LoadService
 import com.puvn.atomicloader.service.simulation.SimulationService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
@@ -41,11 +45,15 @@ class SingleInstanceSimulationService(
 
     private suspend fun sendRequestsPerSecond(target: String, requestsPerSecond: Int, durationSeconds: Int) {
         val delayMillis = 1000 / requestsPerSecond.toLong() // calculate delay in milliseconds
+        val scope = CoroutineScope(Dispatchers.Default)
         repeat(requestsPerSecond * durationSeconds) {
-            val response = makeRequest(target)
-            handleResponse(response) //TODO handle response in asynchronous manner
+            scope.launch { // asynchronous request and response handling
+                val response = makeRequest(target)
+                handleResponse(response)
+            }
             delay(delayMillis)
         }
+        scope.coroutineContext.cancelChildren()
     }
 
     private suspend fun makeRequest(target: String): String {
