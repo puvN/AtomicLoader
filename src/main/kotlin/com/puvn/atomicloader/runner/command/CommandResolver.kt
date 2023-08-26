@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 @Component
 class CommandResolver {
 
-    fun getSystemCommand(): String {
+    fun getStartCommandForSystem(): String {
         val osName = System.getProperty(osNameProperty)
         return if (osName.startsWith(windows)) {
             "$windowsCmdCommand .\\docker\\start.bat"

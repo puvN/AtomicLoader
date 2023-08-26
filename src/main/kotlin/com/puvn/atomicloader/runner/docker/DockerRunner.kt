@@ -13,8 +13,8 @@ class DockerRunner(
 
     fun startTargetContainer() {
         log.info("starting docker container")
-        val command = commandResolver.getSystemCommand()
-        val process = Runtime.getRuntime().exec(command)
+        val startCommand = commandResolver.getStartCommandForSystem()
+        val process = Runtime.getRuntime().exec(startCommand)
         process.waitFor()
         log.info("waiting for application to start")
         Thread.sleep(applicationTargetConfig.waitForStartSeconds.toLong() * 1000)
