@@ -5,6 +5,7 @@ import com.puvn.atomicloader.config.loader.LoaderConfig
 import com.puvn.atomicloader.config.loader.LoaderProfile
 import com.puvn.atomicloader.exception.ConfigurationException
 import com.puvn.atomicloader.exception.ExceptionEnum
+import com.puvn.atomicloader.exception.buildExceptionMessage
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -24,24 +25,31 @@ class ConfigsValidatorTest {
     }
 
     @Test
-    fun check_config_throws_no_urls_or_endpoints() {
+    fun check_config_throws_no_urls() {
         val loaderConfig = LoaderConfig(
             10, 5, LoaderProfile.LOCAL, false
         )
-        var applicationTargetConfig = ApplicationTargetConfig(
+        val applicationTargetConfig = ApplicationTargetConfig(
             emptySet(), setOf("/endpoint1", "/v2/endpoint2")
         )
-        val result1 = assertThrows<ConfigurationException> {
+        val result = assertThrows<ConfigurationException> {
             ConfigsValidator(applicationTargetConfig, loaderConfig).validateConfigs()
         }
-        applicationTargetConfig = ApplicationTargetConfig(
+        assertEquals(result.message, ExceptionEnum.NO_URLS.exceptionString)
+    }
+
+    @Test
+    fun check_config_throws_no_endpoints() {
+        val loaderConfig = LoaderConfig(
+            10, 5, LoaderProfile.LOCAL, false
+        )
+        val applicationTargetConfig = ApplicationTargetConfig(
             setOf("localhost:8081", "127.0.0.1:8082"), emptySet()
         )
-        val result2 = assertThrows<ConfigurationException> {
+        val result = assertThrows<ConfigurationException> {
             ConfigsValidator(applicationTargetConfig, loaderConfig).validateConfigs()
         }
-        assertEquals(result1.message, result2.message)
-        assertEquals(result1.message, ExceptionEnum.NO_URLS_OR_ENDPOINTS.exceptionString)
+        assertEquals(result.message, ExceptionEnum.NO_ENDPOINTS.exceptionString)
     }
 
     @Test
@@ -58,7 +66,12 @@ class ConfigsValidatorTest {
         var result = assertThrows<ConfigurationException> {
             ConfigsValidator(applicationTargetConfig, loaderConfig).validateConfigs()
         }
-        assertEquals(result.message, ExceptionEnum.INVALID_VALUE.exceptionString)
+        assertEquals(
+            result.message, buildExceptionMessage(
+                ExceptionEnum.INVALID_VALUE.exceptionString,
+                ConfigsValidator.TESTING_PERIOD_SECONDS_PARAM_NAME
+            )
+        )
 
         loaderConfig = LoaderConfig(
             10, invalidRequestsPerSeconds, LoaderProfile.LOCAL, false
@@ -66,7 +79,13 @@ class ConfigsValidatorTest {
         result = assertThrows {
             ConfigsValidator(applicationTargetConfig, loaderConfig).validateConfigs()
         }
-        assertEquals(result.message, ExceptionEnum.INVALID_VALUE.exceptionString)
+        assertEquals(
+            result.message,
+            buildExceptionMessage(
+                ExceptionEnum.INVALID_VALUE.exceptionString,
+                ConfigsValidator.REQUESTS_PER_SECOND_PARAM_NAME
+            )
+        )
     }
 
 }
