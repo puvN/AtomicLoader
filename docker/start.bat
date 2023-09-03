@@ -35,7 +35,7 @@ if %errorlevel% equ 0 (
 
 REM Start Docker container from image
 echo Starting Docker container...
-docker run -d -p 8080:8080 atomicloadertarget
+docker run -d -p 8080:8080 --name my-target --network infrastructure_my-network atomicloadertarget
 
 REM Wait for container to start
 echo Waiting for Docker container to start...

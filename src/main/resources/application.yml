@@ -14,9 +14,9 @@ application-target:
 
 loader-config:
   # testing period in seconds for each endpoint
-  testing-period-seconds: 5
+  testing-period-seconds: 2400
   # number of requests which would be made during testing period for each endpoint
-  requests-per-second: 10
+  requests-per-second: 100
   # load testing profile - local (on local machine) / remote (on remote host)
   profile: LOCAL
   # process-per-instance (on jvm for each target instance)
